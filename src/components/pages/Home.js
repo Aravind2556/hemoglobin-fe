@@ -181,7 +181,7 @@ function Home() {
   </h2>
 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5">
-    <CardView label="IR" value={recentGripValue} />
+    <CardView label="GREEN" value={recentGripValue} />
 
     <CardView label="RED" value={recentTemperatrueValue} />
 
