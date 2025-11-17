@@ -45,8 +45,8 @@ function Home() {
             setGripLevel({
               "x-axis": xAxis,
               "y-axis": data.feeds.map(feed => Number(feed.field1) || 0),
-              color: "blue",
-              seriesName: 'IR'
+              color: "green",
+              seriesName: 'Green'
             })
 
             setTemperature({
@@ -110,37 +110,37 @@ function Home() {
               "x-axis": [],
               "y-axis": [],
               color: "black",
-              seriesName: 'Heart rate'
+              seriesName: 'Green'
             })
             setTemperature({
               "x-axis": [],
               "y-axis": [],
               color: "black",
-              seriesName: 'temperature'
+              seriesName: 'RED'
             })
             setFallDetect({
               "x-axis": [],
               "y-axis": [],
               color: "black",
-              seriesName: 'Snoring Level'
+              seriesName: 'ECG'
             })
             setBatteryPercentage({
               "x-axis": [],
               "y-axis": [],
               color: "#ED254E",
-              seriesName: 'Roll'
+              seriesName: 'SPO2'
             })
             setHeartRate({
               "x-axis": [],
               "y-axis": [],
               color: "#00F874",
-              seriesName: 'Pitch'
+              seriesName: 'HEMOBLOIN'
             })
             setSPo2({
               "x-axis": [],
               "y-axis": [],
               color: "#2A4494",
-              seriesName: 'Yaw'
+              seriesName: 'HEART RATE'
             })
             setRecentGripValue("No Data")
             setRecentTemperatrueValue("No Data")
