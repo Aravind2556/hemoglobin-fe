@@ -13,6 +13,9 @@ function Home() {
   const [haertRate,setHeartRate]=useState(null) //field 6
   const [spo2,setSPo2]=useState(null) // field 7
 
+  const [recentSpo2, setRecentSpo2] = useState(null)
+  const [recentHeartRate, setRecentHeartRate]=useState(null)
+
   const [predict,setPredict]=useState(null)
 
   const url = process.env.REACT_APP_ThinkSpeak_URL
@@ -83,6 +86,12 @@ function Home() {
               seriesName: 'HEART RATE'
             })
 
+            const recentSpo2value = data.feeds.slice(-1)[0].field4
+            setRecentSpo2(recentSpo2value)
+
+            const recentHeartRateValue = data.feeds.slice(-1)[0].field6
+            setRecentHeartRate(recentHeartRateValue)
+           
           }
           else{
             setGripLevel({
@@ -161,7 +170,7 @@ function Home() {
     return () => clearInterval(interval); 
   }, []);
 
-console.log("predict" , predict)
+console.log("predict" , recentHeartRate)
 
   if (!gripLevel || !temperature || !fallDetect || !batteryPercentage || !haertRate || !spo2 || !predict) {
     return <div>Loading...</div>
@@ -181,23 +190,33 @@ console.log("predict" , predict)
         {/* IR & RED */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
-            <p className="font-semibold text-gray-600">IR Value</p>
+            <p className="font-semibold text-gray-600">IR predict</p>
             <p className="text-2xl font-bold text-gray-900">{predict?.["IR"] ?? "-"}</p>
           </div>
 
           <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
-            <p className="font-semibold text-gray-600">Red Value</p>
+            <p className="font-semibold text-gray-600">Red predict</p>
             <p className="text-2xl font-bold text-gray-900">{predict?.["RED"] ?? "-"}</p>
           </div>
 
           <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
-            <p className="font-semibold text-gray-600">ECG Value</p>
+            <p className="font-semibold text-gray-600">ECG predict</p>
             <p className="text-2xl font-bold text-gray-900">{predict?.["ECG"] ?? "-"}</p>
           </div>
 
           <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
             <p className="font-semibold text-gray-600">Hemoglobin predict</p>
             <p className="text-2xl font-bold text-gray-900">{predict?.["hemoglobin_pred"] ?? "-"}</p>
+          </div>
+
+          <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
+            <p className="font-semibold text-gray-600">Heart Rate predict</p>
+            <p className="text-2xl font-bold text-gray-900">{recentHeartRate || "-"}</p>
+          </div>
+
+          <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
+            <p className="font-semibold text-gray-600">Spo2 predict</p>
+            <p className="text-2xl font-bold text-gray-900">{recentSpo2 || "-"}</p>
           </div>
         </div>
 
@@ -246,7 +265,6 @@ console.log("predict" , predict)
           </div>
         ))}
       </div>
-
     </div>
 
   );
