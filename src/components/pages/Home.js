@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import LiveChart from '../blocks/LiveChart'
+import { DContext } from '../../context/Datacontext';
 
 function Home() {
+
+  const { BeURL} = useContext(DContext)
 
   const [gripLevel, setGripLevel] = useState(null) // field 1
   const [temperature, setTemperature] = useState(null) // field 2
@@ -10,13 +13,7 @@ function Home() {
   const [haertRate,setHeartRate]=useState(null) //field 6
   const [spo2,setSPo2]=useState(null) // field 7
 
-  const [recentGripValue, setRecentGripValue] = useState(null)
-  const [recentTemperatrueValue, setRecentTemperatrueValue] = useState(null) 
-  const [recentFallDelectValue, setRecentFallDetectValue] = useState(null) 
-  const [recentPostureValue,setRecentPostureValue]=useState(null)
-  const [recentBatteryPercentageValue, setRecentBatteryPercentageValue] = useState(null) 
-  const [recentHaertRateValue, setRecentHaertRateValue] = useState(null)
-
+  const [predict,setPredict]=useState(null)
 
   const url = process.env.REACT_APP_ThinkSpeak_URL
 
@@ -33,6 +30,8 @@ function Home() {
     autoSelected: 'zoom'
   };
 
+  console.log("predict" , predict)
+
   useEffect(() => {
     const fetchData = async () => {
       fetch(url)
@@ -46,7 +45,7 @@ function Home() {
               "x-axis": xAxis,
               "y-axis": data.feeds.map(feed => Number(feed.field1) || 0),
               color: "green",
-              seriesName: 'Green'
+              seriesName: 'IR'
             })
 
             setTemperature({
@@ -83,26 +82,6 @@ function Home() {
               color: "Indigo",
               seriesName: 'HEART RATE'
             })
-
-            const recentGripLevel = data.feeds.slice(-1)[0].field1.toUpperCase()
-            setRecentGripValue(recentGripLevel)
-
-            const recentTemperatureLevel = data.feeds.slice(-1)[0].field2.toUpperCase()
-            setRecentTemperatrueValue(recentTemperatureLevel)
-
-            const recentFallDetectLevel = data.feeds.slice(-1)[0].field3.toUpperCase()
-            setRecentFallDetectValue(recentFallDetectLevel)
-
-            const recentPostureLevel = data.feeds.slice(-1)[0].field4.toUpperCase()
-            setRecentPostureValue(recentPostureLevel)
-
-            const recentBatteryPercentageLevel = data.feeds.slice(-1)[0].field5.toUpperCase()
-            setRecentBatteryPercentageValue(recentBatteryPercentageLevel)
-
-            const recentHeartRateLevel = data.feeds.slice(-1)[0].field6.toUpperCase()
-            setRecentHaertRateValue(recentHeartRateLevel)
-
-
 
           }
           else{
@@ -142,12 +121,6 @@ function Home() {
               color: "#2A4494",
               seriesName: 'HEART RATE'
             })
-            setRecentGripValue("No Data")
-            setRecentTemperatrueValue("No Data")
-            setRecentFallDetectValue("No Data")
-            setRecentPostureValue("No Data")
-            setRecentBatteryPercentageValue("No Data")
-            setRecentHaertRateValue("No Data")
 
           }
         })
@@ -155,7 +128,6 @@ function Home() {
           console.log("Error in fetching from Thinkspeak:", err)
         })
     };
-
     let intervalId
     if (url) {
       fetchData();
@@ -167,62 +139,119 @@ function Home() {
   }, [url]);
 
 
+  // Ai - ml predict
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`${BeURL}/fetch-ml-predict`, {
+        method: "GET",
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.success){
+           setPredict(data.data)
+        }
+        else{
+         
+        }
+      })
 
-  if (!gripLevel || !temperature || !fallDetect || !batteryPercentage || !haertRate || !spo2 || !recentGripValue || !recentTemperatrueValue || !recentFallDelectValue || !recentBatteryPercentageValue || !recentHaertRateValue  || !recentGripValue) {
+        .catch((err) => console.log(err));
+    }, 5000); // 5000ms = 5 seconds
+
+    return () => clearInterval(interval); 
+  }, []);
+
+console.log("predict" , predict)
+
+  if (!gripLevel || !temperature || !fallDetect || !batteryPercentage || !haertRate || !spo2 || !predict) {
     return <div>Loading...</div>
   }
 
-
-  return (
-    <div className="mx-auto px-5 space-y-5">
-<div className="w-full py-8 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-lg border mt-5">
-  <h2 className="text-primary-400 font-bold text-2xl mb-6 text-center">
-    Recent HEMOGLOBIN Data
-  </h2>
-
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-5">
-    <CardView label="GREEN" value={recentGripValue} />
-
-    <CardView label="RED" value={recentTemperatrueValue} />
-
-    <CardView label="ECG" value={recentFallDelectValue} />
-
-    <CardView label="SPO2" value={recentPostureValue} />
-
-          <CardView label="HEMOGLOBIN" value={recentBatteryPercentageValue} />
-
-    <CardView label="HEART RATE" value={recentHaertRateValue} />
-
   
-  </div>
-</div>
+  return (
+    <div className="mx-auto px-4 py-4 space-y-6">
 
-      
-      {/* Charts Section */}
-      <div className="flex flex-wrap justify-around gap-2">
-        {[gripLevel, temperature, fallDetect , batteryPercentage , haertRate , spo2].map((chartData, i) => {
-            return (
-              <div className=" m-2 border w-11/12 md:w-5/12 rounded-lg" key={i} style={{ marginBottom: "20px" }}>
-                <LiveChart data={[chartData]} color={chartData.color} title={chartData.seriesName} lineStyle={'straight'} lineWidth={1} chartType={'line'} controls={controls} />
-              </div>
-            )
-          })}
+      {/* MAIN CARD */}
+      <div className="bg-white shadow-xl rounded-2xl p-6 border w-full max-w-2xl mx-auto">
+
+        <h2 className="text-2xl font-bold text-blue-700 border-b pb-3 mb-4 tracking-wide">
+          Patient Sensor Health Report
+        </h2>
+
+        {/* IR & RED */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
+            <p className="font-semibold text-gray-600">IR Value</p>
+            <p className="text-2xl font-bold text-gray-900">{predict?.["IR"] ?? "-"}</p>
+          </div>
+
+          <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
+            <p className="font-semibold text-gray-600">Red Value</p>
+            <p className="text-2xl font-bold text-gray-900">{predict?.["RED"] ?? "-"}</p>
+          </div>
+
+          <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
+            <p className="font-semibold text-gray-600">ECG Value</p>
+            <p className="text-2xl font-bold text-gray-900">{predict?.["ECG"] ?? "-"}</p>
+          </div>
+
+          <div className="p-4 border rounded-xl bg-gray-50 shadow-sm">
+            <p className="font-semibold text-gray-600">Hemoglobin predict</p>
+            <p className="text-2xl font-bold text-gray-900">{predict?.["hemoglobin_pred"] ?? "-"}</p>
+          </div>
+        </div>
+
+        {/* HEADLINE */}
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-green-700 tracking-wide">
+           Prediction Summary
+          </h3>
+        </div>
+
+        {/* SPO2 */}
+        <div className="p-4 border rounded-xl bg-blue-50 shadow-sm mb-4">
+          <p className="font-semibold text-gray-700">Hemoglobin</p>
+          <p className={`mt-1 text-lg font-semibold ${predict?.["hb_category"] === "Normal" ? "text-green-700" : "text-red-600"
+            }`}>
+            Status: {predict?.["hb_category"]}
+          </p>
+        </div>
+
+        {/* Heart Rate */}
+        <div className="p-4 border rounded-xl bg-purple-50 shadow-sm mb-4">
+          <p className="font-semibold text-gray-700">Heart rate</p>
+          <p className={`mt-1 text-lg font-semibold ${predict?.["heart_rate_pred"] === "Normal" ? "text-green-700" : "text-red-600"
+            }`}>
+            Status: {predict?.["heart_rate_pred"]}
+          </p>
+        </div>
+      </div>
+
+      {/* CHARTS SECTION */}
+      <div className="w-full flex flex-wrap justify-center gap-4 mt-6">
+        {[gripLevel, temperature].map((chartData, i) => (
+          <div
+            className="border rounded-xl shadow-md bg-white w-full md:w-[45%] p-3"
+            key={i}
+          >
+            <LiveChart
+              data={[chartData]}
+              color={chartData.color}
+              title={chartData.seriesName}
+              lineStyle="straight"
+              lineWidth={2}
+              chartType="line"
+              controls={controls}
+            />
+          </div>
+        ))}
       </div>
 
     </div>
+
   );
 }
 
 export default Home
 
 
-const CardView = ({ label, value, className = "" }) => {
-  return (
-    <div className={`flex justify-between items-center px-6 py-4 bg-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all ${className}`}>
-      <span className="text-gray-700 font-medium">{label}</span>
-      <span className="bg-secondary-200 text-secondary-800 font-semibold py-1 px-3 rounded-md">
-        {value}
-      </span>
-    </div>
-  );
-};
